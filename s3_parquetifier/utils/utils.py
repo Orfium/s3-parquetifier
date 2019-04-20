@@ -8,14 +8,16 @@ import requests
 
 class Utils:
 
-    def parquetify_csv(
+    def _parquetify(
             self,
+            file_type='csv',
             file_name=None,
             chunksize=1000000,
             skip_rows=None,
             dtype=None,
             compression=None,
-            # streaming=False
+            pre_process_chunk=None,
+            kwargs=dict()
     ):
         """
         Given a file split it into segments and upload it to S3 in a parquet format.
@@ -27,15 +29,19 @@ class Utils:
 
         file_number = 1
 
-        for chunk in self.get_chunk_from_csv(file_name, skip_rows, chunksize, dtype):
+        for chunk in self.get_chunk_from_file(file_type=file_type,
+                                              file_name=file_name,
+                                              skip_rows=skip_rows,
+                                              chunksize=chunksize,
+                                              dtype=dtype):
 
             # apply any pre-processing in the chunk
-            chunk = self.pre_process_chunk(chunk)
+            if pre_process_chunk:
+                chunk = pre_process_chunk(chunk=chunk, **kwargs)
 
             # construct the name of the part
-            chunk_name = file_name.split('.csv')[0].split('/')[-1] + '_part_%s.parquet%s' % (str(file_number).zfill(4),
-                                                                                             '.' + compression
-                                                                                             if compression else '')
+            chunk_name = file_name.split('.'+file_type)[0].split('/')[-1] + '_part_%s.parquet%s' % \
+                         (str(file_number).zfill(4), '.' + compression if compression else '')
 
             # export the part as parquet and compressed if needed
             chunk.to_parquet(chunk_name, compression=compression)
@@ -49,31 +55,29 @@ class Utils:
 
         return
 
-    def pre_process_chunk(self, chunk):
-
-        return chunk
-
     @staticmethod
-    def get_chunk_from_csv(
+    def get_chunk_from_file(
+            file_type='csv',
             file_name=None,
             skip_rows=None,
             chunksize=None,
             dtype=None,
-            # streaming=False
     ):
-        streaming = False
 
-        if not streaming:
+        if True:
 
             # Open the CSV file with pandas
-
-            for chunk in pd.read_csv(file_name,
-                                     skiprows=skip_rows,
-                                     chunksize=chunksize,
-                                     dtype=dtype,
-                                     low_memory=False if dtype else True):
-                yield chunk
+            if file_type == 'csv':
+                for chunk in pd.read_csv(file_name,
+                                         skiprows=skip_rows,
+                                         chunksize=chunksize,
+                                         dtype=dtype,
+                                         low_memory=False if dtype else True):
+                    yield chunk
+            else:
+                raise NotImplementedError()
         else:
+            # TODO next feature
 
             # Stream the file from the url
             r = requests.get(file_name, stream=True)

@@ -35,7 +35,7 @@ class TestUtils(TestCase):
         self.get_files()
 
         total = 0
-        for chunk in Utils().get_chunk_from_csv(file_name=self.csv1, chunksize=10):
+        for chunk in Utils().get_chunk_from_file(file_name=self.csv1, chunksize=10):
             total += sum(chunk['Sunspots'])
 
         os.unlink(self.csv1)
@@ -46,7 +46,7 @@ class TestUtils(TestCase):
         self.get_skip_rows_file()
 
         total = 0
-        for chunk in Utils().get_chunk_from_csv(file_name=self.csv_skiprows, chunksize=10, skip_rows=1):
+        for chunk in Utils().get_chunk_from_file(file_name=self.csv_skiprows, chunksize=10, skip_rows=1):
             total += sum(chunk['Sunspots'])
 
         os.unlink(self.csv_skiprows)
@@ -57,7 +57,7 @@ class TestUtils(TestCase):
         self.get_gziped_file()
 
         total = 0
-        for chunk in Utils().get_chunk_from_csv(file_name=self.csv_gziped, chunksize=10):
+        for chunk in Utils().get_chunk_from_file(file_name=self.csv_gziped, chunksize=10):
             total += sum(chunk['Sunspots'])
 
         os.unlink(self.csv_gziped)
@@ -68,7 +68,8 @@ class TestUtils(TestCase):
         self.get_files()
 
         total = 0
-        for chunk in Utils().get_chunk_from_csv(file_name=self.csv1, chunksize=10, dtype={"Month": str, "Sunsports": float}):
+        for chunk in Utils().get_chunk_from_file(file_name=self.csv1, chunksize=10,
+                                                 dtype={"Month": str, "Sunsports": float}):
             total += sum(chunk['Sunspots'])
 
         os.unlink(self.csv1)
@@ -81,9 +82,9 @@ class TestUtils(TestCase):
         utils = Utils()
 
         total = 0
-        for file_name in utils.parquetify_csv(file_name=self.csv1,
-                                              chunksize=10,
-                                              dtype={"Month": str, "Sunsports": float}):
+        for file_name in utils._parquetify(file_name=self.csv1,
+                                           chunksize=10,
+                                           dtype={"Month": str, "Sunsports": float}):
             file_path = os.path.join(os.getcwd(), file_name)
             df_temp = pd.read_parquet(file_path)
 
@@ -99,10 +100,10 @@ class TestUtils(TestCase):
         utils = Utils()
 
         total = 0
-        for file_name in utils.parquetify_csv(file_name=self.csv1,
-                                              chunksize=10,
-                                              dtype={"Month": str, "Sunsports": float},
-                                              compression='gzip'):
+        for file_name in utils._parquetify(file_name=self.csv1,
+                                           chunksize=10,
+                                           dtype={"Month": str, "Sunsports": float},
+                                           compression='gzip'):
 
             file_path = os.path.join(os.getcwd(), file_name)
             df_temp = pd.read_parquet(file_path)
@@ -123,12 +124,11 @@ class TestUtils(TestCase):
 
             return chunk
 
-        utils.pre_process_chunk = pre_process
-
         total = 0
-        for file_name in utils.parquetify_csv(file_name=self.csv1,
-                                              chunksize=10,
-                                              dtype={"Month": str, "Sunsports": float}):
+        for file_name in utils._parquetify(file_name=self.csv1,
+                                           chunksize=10,
+                                           dtype={"Month": str, "Sunsports": float},
+                                           pre_process_chunk=pre_process):
 
             file_path = os.path.join(os.getcwd(), file_name)
             df_temp = pd.read_parquet(file_path)
@@ -149,11 +149,11 @@ class TestUtils(TestCase):
 
             return chunk
 
-        utils.pre_process_chunk = pre_process
+        for file_name in utils._parquetify(file_name=self.csv1,
+                                           chunksize=10,
+                                           dtype={"Month": str, "Sunsports": float},
+                                           pre_process_chunk=pre_process):
 
-        for file_name in utils.parquetify_csv(file_name=self.csv1,
-                                              chunksize=10,
-                                              dtype={"Month": str, "Sunsports": float}):
             file_path = os.path.join(os.getcwd(), file_name)
             df_temp = pd.read_parquet(file_path)
 
