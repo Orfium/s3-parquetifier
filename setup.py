@@ -19,6 +19,7 @@ setup(
     install_requires=[
         "boto3",
         "pandas",
-        "pyarrow"
+        "pyarrow",
+        "requests"
     ],
 )
