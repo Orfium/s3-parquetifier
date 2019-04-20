@@ -160,3 +160,27 @@ class TestUtils(TestCase):
             self.assertIn('Extra Column', list(df_temp.columns))
 
             os.unlink(file_path)
+
+    def test_parquetify_csv_with_extra_columns_custom_value(self):
+        self.get_files()
+
+        utils = Utils()
+
+        def pre_process(chunk, value=None):
+            chunk['Extra Column'] = value
+
+            return chunk
+
+        for file_name in utils._parquetify(file_name=self.csv1,
+                                           chunksize=10,
+                                           dtype={"Month": str, "Sunsports": float},
+                                           pre_process_chunk=pre_process,
+                                           kwargs={"value": "test"}):
+
+            file_path = os.path.join(os.getcwd(), file_name)
+            df_temp = pd.read_parquet(file_path)
+
+            self.assertIn('Extra Column', list(df_temp.columns))
+            self.assertEqual(df_temp.iloc[0]['Extra Column'], 'test')
+
+            os.unlink(file_path)
