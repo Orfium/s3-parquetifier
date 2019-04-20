@@ -131,7 +131,6 @@ class AWSClient:
         list_of_objects = []
         if 'Contents' in objects:
             for object in objects['Contents']:
-                print(object['Key'])
                 if key + '/' != object['Key']:
                     # path = key + '/' + object['Key'] if key else object['Key']
                     list_of_objects.append(object['Key'])

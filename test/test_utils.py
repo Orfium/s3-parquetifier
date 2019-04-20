@@ -84,7 +84,27 @@ class TestUtils(TestCase):
         for file_name in utils.parquetify_csv(file_name=self.csv1,
                                               chunksize=10,
                                               dtype={"Month": str, "Sunsports": float}):
-            file_path = os.path.join(os.path.dirname(__file__), file_name)
+            file_path = os.path.join(os.getcwd(), file_name)
+            df_temp = pd.read_parquet(file_path)
+
+            total += sum(df_temp['Sunspots'])
+
+            os.unlink(file_path)
+
+        self.assertEqual(total, 2187)
+
+    def test_parquetify_csv_valid_with_compression(self):
+        self.get_files()
+
+        utils = Utils()
+
+        total = 0
+        for file_name in utils.parquetify_csv(file_name=self.csv1,
+                                              chunksize=10,
+                                              dtype={"Month": str, "Sunsports": float},
+                                              compression='gzip'):
+
+            file_path = os.path.join(os.getcwd(), file_name)
             df_temp = pd.read_parquet(file_path)
 
             total += sum(df_temp['Sunspots'])
@@ -110,7 +130,7 @@ class TestUtils(TestCase):
                                               chunksize=10,
                                               dtype={"Month": str, "Sunsports": float}):
 
-            file_path = os.path.join(os.path.dirname(__file__), file_name)
+            file_path = os.path.join(os.getcwd(), file_name)
             df_temp = pd.read_parquet(file_path)
 
             total += sum(df_temp['Sunspots'])
@@ -134,7 +154,7 @@ class TestUtils(TestCase):
         for file_name in utils.parquetify_csv(file_name=self.csv1,
                                               chunksize=10,
                                               dtype={"Month": str, "Sunsports": float}):
-            file_path = os.path.join(os.path.dirname(__file__), file_name)
+            file_path = os.path.join(os.getcwd(), file_name)
             df_temp = pd.read_parquet(file_path)
 
             self.assertIn('Extra Column', list(df_temp.columns))
