@@ -7,14 +7,14 @@ import os
 class S3Parquetifier:
 
     def __init__(
-            self,
-            aws_access_key=None,
-            aws_secret_key=None,
-            region='us-west-2',
-            verbose=False,
-            source_bucket=None,
-            target_bucket=None,
-            type='S3'
+        self,
+        aws_access_key=None,
+        aws_secret_key=None,
+        region='us-west-2',
+        verbose=False,
+        source_bucket=None,
+        target_bucket=None,
+        type='S3'
     ):
         """
         Make sure you have the proper credentials to access the AWS buckets and Glue
@@ -58,16 +58,17 @@ class S3Parquetifier:
         logging.getLogger('siakon.s3Parquetifier').propagate = verbose
 
     def convert_from_s3(
-            self,
-            source_key=None,
-            target_key=None,
-            file_type='csv',
-            chunk_size=100000,
-            dtype=None,
-            skip_rows=None,
-            compression=None,
-            keep_original_name_locally=False,
-            pre_process_chunk=None
+        self,
+        source_key=None,
+        target_key=None,
+        file_type='csv',
+        chunk_size=100000,
+        dtype=None,
+        skip_rows=None,
+        compression=None,
+        keep_original_name_locally=False,
+        pre_process_chunk=None,
+        kwargs={}
     ):
         """
         Convert a file or a series or files from a bucket to another
@@ -91,7 +92,8 @@ class S3Parquetifier:
             bucket=self.source_bucket,
             key=source_key
         )
-        logger.info('Found {} objects from the path {}'.format(len(list_of_objects), self.source_bucket + source_key))
+        logger.info('Found {} objects in the path s3://{}/{}'.
+                    format(len(list_of_objects), self.source_bucket, source_key))
         logger.info('Initiating splitting...')
 
         # For each object download it and convert it to parquet
@@ -99,7 +101,8 @@ class S3Parquetifier:
 
             # Get the file name from the object
             if keep_original_name_locally:
-                output_file_name = object.split('/')[-1].split('.')[1]
+                output_file_name = object.split('/')[-1].split('.')[0] + '.' \
+                                   + '.'.join(object.split('/')[-1].split('.')[1:])
 
             # Download the file from S3
             file_name = self.aws_client.download_from_s3(key=object,
@@ -115,7 +118,8 @@ class S3Parquetifier:
                     chunksize=chunk_size,
                     compression=compression,
                     skip_rows=skip_rows,
-                    pre_process_chunk=pre_process_chunk
+                    pre_process_chunk=pre_process_chunk,
+                    kwargs=kwargs
             ):
 
                 # if the key does not ends in `/` then concat a `/` after the key
@@ -126,26 +130,26 @@ class S3Parquetifier:
                 self.aws_client.upload_to_s3(bucket=self.target_bucket, key=target_path, file_name=part)
 
                 # Upload part to S3
-                logger.info('Part {} uploaded to S3 bucket {}.'.format(part, self.target_bucket + target_key))
+                logger.info('Part {} uploaded to s3://{}/{}/'.format(part, self.target_bucket, target_key))
 
-                os.unlink(part)
+                os.unlink(os.path.join(os.getcwd(), part))
 
-            os.unlink(file_name)
+            os.unlink(os.path.join(os.getcwd(), file_name))
 
             logger.info('Done splitting file {}'.format(file_name))
 
         logger.info('Done.')
 
     def convert_from_local(
-            self,
-            source_name=None,
-            target_name=None,
-            file_type='csv',
-            chunk_size=100000,
-            dtype=None,
-            skip_rows=None,
-            extra_columns=None,
-            compression=None
+        self,
+        source_name=None,
+        target_name=None,
+        file_type='csv',
+        chunk_size=100000,
+        dtype=None,
+        skip_rows=None,
+        extra_columns=None,
+        compression=None
     ):
         """
         Convert files to Parquet locally

@@ -17,7 +17,7 @@ class Utils:
             dtype=None,
             compression=None,
             pre_process_chunk=None,
-            kwargs=dict()
+            kwargs={}
     ):
         """
         Given a file split it into segments and upload it to S3 in a parquet format.
@@ -45,13 +45,11 @@ class Utils:
 
             # export the part as parquet and compressed if needed
             chunk.to_parquet(chunk_name, compression=compression)
-            logger.info('File %s is generated.' % chunk_name)
+            # logger.info('File %s is generated.' % chunk_name)
 
             # yield the generated part for upload
             yield chunk_name
             file_number += 1
-
-        os.unlink(file_name)
 
         return
 

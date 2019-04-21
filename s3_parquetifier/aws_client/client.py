@@ -180,10 +180,8 @@ class AWSClient:
                             aws_access_key_id=self.access_key,
                             aws_secret_access_key=self.secret_key)
 
-        from botocore.client import ClientError
-
         try:
-            s3.meta.client.head_bucket(Bucket=bucket.name)
+            s3.meta.client.head_bucket(Bucket=bucket)
 
             return True
         except ClientError as e:
