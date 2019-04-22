@@ -16,7 +16,7 @@ S3 Parquetifier supports the following files
 To install the package just run the following
 
 ```python
-pip install git+git://github.com/siakon89/s3-parquetifier.git
+pip install s3-parquetifier
 ```
 
 ### How to use it
