@@ -48,7 +48,8 @@ S3Parquetifier(
     dtype=None,  # A dictionary defining the types of the columns
     skip_rows=None,  # How many rows to skip per chunk
     compression='gzip',  # The compression type
-    keep_original_name_locally=True  # In order to keep the original filename or create a random when downloading the file
+    keep_original_name_locally=True,  # In order to keep the original filename or create a random when downloading the file
+    encoding='utf-8'  # Set the encoding of the file
 )
 ```
 
@@ -100,6 +101,7 @@ S3Parquetifier(
     skip_rows=None,  # How many rows to skip per chunk
     compression='gzip',  # The compression type
     keep_original_name_locally=True,  # In order to keep the original filename or create a random when downloading the file
+    encoding='utf-8',  # Set the encoding of the file
     pre_process_chunk=pre_process,  # A preprocessing function that will pre-process the each chunk
     kwargs=kwargs  # potential extra arguments for the pre-preocess function
 )
