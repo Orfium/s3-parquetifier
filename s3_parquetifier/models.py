@@ -67,6 +67,7 @@ class S3Parquetifier:
         skip_rows=None,
         compression=None,
         keep_original_name_locally=False,
+        encoding='utf-8',
         pre_process_chunk=None,
         kwargs={}
     ):
@@ -118,6 +119,7 @@ class S3Parquetifier:
                     chunksize=chunk_size,
                     compression=compression,
                     skip_rows=skip_rows,
+                    encoding=encoding,
                     pre_process_chunk=pre_process_chunk,
                     kwargs=kwargs
             ):

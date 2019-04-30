@@ -16,6 +16,7 @@ class Utils:
             skip_rows=None,
             dtype=None,
             compression=None,
+            encoding='utf-8',
             pre_process_chunk=None,
             kwargs={}
     ):
@@ -33,7 +34,8 @@ class Utils:
                                               file_name=file_name,
                                               skip_rows=skip_rows,
                                               chunksize=chunksize,
-                                              dtype=dtype):
+                                              dtype=dtype,
+                                              encoding=encoding):
 
             # apply any pre-processing in the chunk
             if pre_process_chunk:
@@ -60,6 +62,7 @@ class Utils:
             skip_rows=None,
             chunksize=None,
             dtype=None,
+            encoding='utf-8',
     ):
 
         if True:
@@ -70,6 +73,7 @@ class Utils:
                                          skiprows=skip_rows,
                                          chunksize=chunksize,
                                          dtype=dtype,
+                                         encoding=encoding,
                                          low_memory=False if dtype else True):
                     yield chunk
             else:
