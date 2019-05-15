@@ -1,10 +1,12 @@
 # S3 Parquetifier
 [![Build Status](https://semaphoreci.com/api/v1/projects/e5f4d811-2000-4e01-a0e5-eb695ebc92d6/2651638/shields_badge.svg)](https://semaphoreci.com/thelastdev/s3-parquetifier)
+[![PyPI version fury.io](https://badge.fury.io/py/s3-parquetifier.svg)](https://pypi.org/project/s3-parquetifier/)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
 
 S3 Parquetifier is an ETL tool that can take a file from an S3 bucket convert it to Parquet format and
 save it to another bucket.
 
-S3 Parquetifier supports the following files
+S3 Parquetifier supports the following file types
 - [x] CSV
 - [ ] JSON
 - [ ] TSV
@@ -109,6 +111,7 @@ S3Parquetifier(
 
 ## ToDo
 
+- [x] Add support to handle local files too
 - [ ] Add support for JSON
 - [ ] Add streaming from url support
-- [ ] Add support to handle local files too
+

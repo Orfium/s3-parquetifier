@@ -65,81 +65,82 @@ class Utils:
             encoding='utf-8',
     ):
 
-        if True:
-
-            # Open the CSV file with pandas
-            if file_type == 'csv':
-                for chunk in pd.read_csv(file_name,
-                                         skiprows=skip_rows,
-                                         chunksize=chunksize,
-                                         dtype=dtype,
-                                         encoding=encoding,
-                                         low_memory=False if dtype else True):
-                    yield chunk
-            else:
-                raise NotImplementedError()
+        # Open the CSV file with pandas
+        if file_type == 'csv':
+            for chunk in pd.read_csv(file_name,
+                                     skiprows=skip_rows,
+                                     chunksize=chunksize,
+                                     dtype=dtype,
+                                     encoding=encoding,
+                                     low_memory=False if dtype else True):
+                yield chunk
         else:
-            # TODO next feature
+            raise NotImplementedError()
 
-            # Stream the file from the url
-            r = requests.get(file_name, stream=True)
+    @staticmethod
+    def stream_csv_from_url(
+            file_name,
+            skip_rows,
+            chunksize
+    ):
 
-            # The size of the chunk
-            # buffer_size = 1024 * 1024 * 5  # 64MB per run
-            buffer_size = 1024 * 2
+        logger.warning('THIS IS NOT A COMPLETE FEATURE. IT MAY CONTAIN BUGS. USE WITH CAUTION!')
+        # Stream the file from the url
+        r = requests.get(file_name, stream=True)
 
-            # This is used to get the remainder of the chunk
-            remainder = ""
+        # The size of the chunk
+        # buffer_size = 1024 * 1024 * 5  # 64MB per run
+        buffer_size = 1024 * 2
 
-            # The number of lines processed
-            processed = 0
+        # This is used to get the remainder of the chunk
+        remainder = ""
 
-            batch = ""
-            headers = None
-            skipped_rows = 0
-            for chunk in r.iter_content(chunk_size=buffer_size):
-                data = (remainder + chunk.decode('utf-8')).replace('\r\n', '\n')
+        # The number of lines processed
+        processed = 0
 
-                for line in data.splitlines()[:-1]:
+        batch = ""
+        headers = None
+        skipped_rows = 0
+        for chunk in r.iter_content(chunk_size=buffer_size):
+            data = (remainder + chunk.decode('utf-8')).replace('\r\n', '\n')
 
-                    # Bypass `skip_rows` lines before getting the header
-                    if not headers:
-                        if skip_rows:
-                            if skipped_rows < skip_rows:
-                                skipped_rows += 1
-                                continue
+            for line in data.splitlines()[:-1]:
 
-                        headers = line
-                        continue
+                # Bypass `skip_rows` lines before getting the header
+                if not headers:
+                    if skip_rows:
+                        if skipped_rows < skip_rows:
+                            skipped_rows += 1
+                            continue
 
-                    # If the chunksize is met construct a pandas DataFrame and yield it
-                    if processed >= chunksize:
+                    headers = line
+                    continue
 
-                        batch = headers + '\n' + batch
+                # If the chunksize is met construct a pandas DataFrame and yield it
+                if processed >= chunksize:
+                    batch = headers + '\n' + batch
 
-                        f = StringIO(batch)
+                    f = StringIO(batch)
 
-                        yield pd.read_csv(f, delimiter=',', quotechar='"')
+                    yield pd.read_csv(f, delimiter=',', quotechar='"')
 
-                        processed = 0
-                        batch = ""
+                    processed = 0
+                    batch = ""
 
-                    batch += line + '\n'
-                    processed += 1
+                batch += line + '\n'
+                processed += 1
 
-                    if not chunk:
-                        break
+                if not chunk:
+                    break
 
-                remainder = data.splitlines()[-1]
+            remainder = data.splitlines()[-1]
 
-                if data[-1] in ['\n', '\r']:
-                    remainder += '\n'
+            if data[-1] in ['\n', '\r']:
+                remainder += '\n'
 
-            # for the remainder of the file that did not hit the chunksize
-            batch = headers + '\n' + batch + '\n' + remainder
+        # for the remainder of the file that did not hit the chunksize
+        batch = headers + '\n' + batch + '\n' + remainder
 
-            f = StringIO(batch)
+        f = StringIO(batch)
 
-            yield pd.read_csv(f, delimiter=',', quotechar='"')
-
-
+        yield pd.read_csv(f, delimiter=',', quotechar='"')

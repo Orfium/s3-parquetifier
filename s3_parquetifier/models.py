@@ -1,7 +1,7 @@
 import logging
 from .utils import logger, Utils
 from .aws_client import AWSClient
-import os
+import os, wget
 
 
 class S3Parquetifier:
@@ -28,16 +28,12 @@ class S3Parquetifier:
 
         self.aws_client = None
 
-        if type != 'S3':
-            raise NotImplementedError('Local conversion is not implemented yet')
+        if not aws_access_key or not aws_secret_key:
+            raise ValueError('No credentials for AWS are provided.')
 
-        if type == 'S3':
-            if not aws_access_key or not aws_secret_key:
-                raise ValueError('No credentials for AWS are provided.')
-
-            self.aws_access_key = aws_access_key
-            self.aws_secret_key = aws_secret_key
-            self.region = region
+        self.aws_access_key = aws_access_key
+        self.aws_secret_key = aws_secret_key
+        self.region = region
 
         if not source_bucket or not target_bucket:
             raise ValueError('Please provide a source and a target bucket.')
@@ -72,17 +68,20 @@ class S3Parquetifier:
         kwargs={}
     ):
         """
-        Convert a file or a series or files from a bucket to another
+        Convert a file or a series or files from a bucket to another. Can also accept custom functions for the
+        transformation of each chunk.
         :param source_key: string, the key of the S3 bucket, it can be a folder from S3 also
         :param target_key:
         :param file_type: string, the type of data to process
         :param chunk_size:
         :param dtype:
         :param skip_rows:
-        :param extra_columns:
         :param compression:
         :param keep_original_name_locally: boolean, if True it will extract the file name form the key
                                                     if False it will generate a uuid for the file name
+        :param encoding:
+        :param pre_process_chunk:
+        :param kwargs:
         """
 
         output_file_name = None
@@ -144,27 +143,62 @@ class S3Parquetifier:
 
     def convert_from_local(
         self,
-        source_name=None,
-        target_name=None,
+        file_name=None,
+        target_key=None,
         file_type='csv',
         chunk_size=100000,
         dtype=None,
         skip_rows=None,
-        extra_columns=None,
-        compression=None
+        compression=None,
+        encoding='utf-8',
+        pre_process_chunk=None,
+        kwargs={}
     ):
         """
-        Convert files to Parquet locally
-        :param source_key:
+        Convert files to Parquet locally and upload them to a specific key to S3
+        :param file_name:
         :param target_key:
         :param file_type:
         :param chunk_size:
         :param dtype:
         :param skip_rows:
-        :param extra_columns:
         :param compression:
+        :param encoding:
+        :param pre_process_chunk:
+        :param kwargs:
         :return:
         """
 
+        utils = Utils()
+
+        logger.info('Splitting file {}...'.format(file_name))
+
+        for part in utils._parquetify(
+                file_type=file_type,
+                file_name=file_name,
+                dtype=dtype,
+                chunksize=chunk_size,
+                compression=compression,
+                skip_rows=skip_rows,
+                encoding=encoding,
+                pre_process_chunk=pre_process_chunk,
+                kwargs=kwargs
+        ):
+
+            # if the key does not ends in `/` then concat a `/` after the key
+            target_path = target_key + part
+            if target_key[-1] != '/':
+                target_path = target_key + '/' + part
+
+            self.aws_client.upload_to_s3(bucket=self.target_bucket, key=target_path, file_name=part)
+
+            # Upload part to S3
+            logger.info('Part {} uploaded to s3://{}/{}/'.format(part, self.target_bucket, target_key))
+
+            os.unlink(os.path.join(os.getcwd(), part))
+
+        os.unlink(os.path.join(os.getcwd(), file_name))
+
+        logger.info('Done splitting file {}'.format(file_name))
         # This will move the parquet files from target to destination locally
         raise NotImplementedError()
