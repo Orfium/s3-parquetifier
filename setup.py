@@ -15,7 +15,7 @@ setup(
     name="s3-parquetifier",
 
     # Version number
-    version="0.0.3",
+    version="0.0.6",
 
     # Application author details
     author="Konstantinos Siaterlis",
@@ -37,6 +37,7 @@ setup(
         "boto3",
         "pandas",
         "pyarrow",
-        "requests"
+        "requests",
+        "wget"
     ],
 )
