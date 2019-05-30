@@ -200,5 +200,3 @@ class S3Parquetifier:
         os.unlink(os.path.join(os.getcwd(), file_name))
 
         logger.info('Done splitting file {}'.format(file_name))
-        # This will move the parquet files from target to destination locally
-        raise NotImplementedError()
