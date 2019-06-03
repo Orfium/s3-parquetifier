@@ -15,7 +15,7 @@ setup(
     name="s3-parquetifier",
 
     # Version number
-    version="0.0.6",
+    version="0.0.7",
 
     # Application author details
     author="Konstantinos Siaterlis",
