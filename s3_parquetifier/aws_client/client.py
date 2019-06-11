@@ -1,6 +1,7 @@
 import json
 import traceback
 import uuid
+import os
 
 import boto3
 import botocore
@@ -18,8 +19,26 @@ class AWSClient:
         """
         # Get the AWS credentials
         self.region = region
-        if not access_key or not secret_key:
-            raise Exception('No credentials for AWS are provided')
+        if access_key and secret_key:
+            aws_access_key = access_key
+            aws_secret_key = secret_key
+        else:
+            # Get the AWS credentials
+            aws_access_key = os.environ.get('AWS_ACCESS_KEY_ID', None)
+            aws_secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY', None)
+
+        self.region = region
+        if not aws_access_key or not aws_secret_key:
+            self.session = boto3.session.Session()
+        else:
+            self.session = boto3.session.Session(
+                region_name=self.region,
+                aws_access_key_id=self.aws_access_key,
+                aws_secret_access_key=self.aws_secret_key
+            )
+
+        self.aws_access_key = aws_access_key
+        self.aws_secret_key = aws_secret_key
 
         self.access_key = access_key
         self.secret_key = secret_key
