@@ -149,8 +149,6 @@ class S3Parquetifier:
         :param kwargs: dict, the arguments for the preprocess function
         """
 
-        logger.info('Splitting file {}...'.format(file_name))
-
         for part in self.convert(
                 file_type=file_type,
                 file_name=file_name,
@@ -171,7 +169,7 @@ class S3Parquetifier:
             self.aws_client.upload_to_s3(bucket=self.target_bucket, key=target_path, file_name=part)
 
             # Upload part to S3
-            logger.info('Part {} uploaded to s3://{}/{}/'.format(part, self.target_bucket, target_key))
+            logger.info('Part {} uploaded to s3://{}/{}'.format(part, self.target_bucket, target_key))
 
             os.unlink(os.path.join(os.getcwd(), part))
 
