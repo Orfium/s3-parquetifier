@@ -30,8 +30,6 @@ class S3Parquetifier:
         self.aws_client = None
 
         if s3_enabled:
-            if not aws_access_key or not aws_secret_key:
-                raise ValueError('No credentials for AWS are provided.')
 
             self.aws_access_key = aws_access_key
             self.aws_secret_key = aws_secret_key
