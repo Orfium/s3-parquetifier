@@ -33,12 +33,9 @@ class AWSClient:
         else:
             self.session = boto3.session.Session(
                 region_name=self.region,
-                aws_access_key_id=self.aws_access_key,
-                aws_secret_access_key=self.aws_secret_key
+                aws_access_key_id=aws_access_key,
+                aws_secret_access_key=aws_secret_key
             )
-
-        self.aws_access_key = aws_access_key
-        self.aws_secret_key = aws_secret_key
 
         self.access_key = access_key
         self.secret_key = secret_key
