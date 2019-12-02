@@ -128,7 +128,7 @@ class AWSClient:
         :param bucket: the bucket the file is in
         :param key: the name of the file
         :param delimiter: string, the delimiter which splits the object key into folders
-        :return: list, list of items
+        :return: list of string, list of items in the s3 prefix
         """
 
         if not bucket:
@@ -138,18 +138,16 @@ class AWSClient:
                           aws_access_key_id=self.access_key,
                           aws_secret_access_key=self.secret_key)
 
-        objects = s3.list_objects(
+        objects = s3.list_objects_v2(
             Bucket=bucket,
-            # Delimiter='/',
             Prefix=key
         )
 
         list_of_objects = []
         if 'Contents' in objects:
-            for object in objects['Contents']:
-                if key + '/' != object['Key']:
-                    # path = key + '/' + object['Key'] if key else object['Key']
-                    list_of_objects.append(object['Key'])
+            for o in objects['Contents']:
+                if o['Key'][-1] != "/":
+                    list_of_objects.append(o['Key'])
 
             return list_of_objects
 
